@@ -130,7 +130,13 @@ task('lz:oft:solana:debug', 'Manages OFTStore and OAppRegistry information')
 
             const targetProgramId = new PublicKey(oftStoreInfo.header.owner)
             const programAccount = await connection.getAccountInfo(targetProgramId)
-            const programDataAddress = new PublicKey(programAccount!.data.slice(4, 36))
+            if (!programAccount?.data) {
+                DebugLogger.keyValue('Program ID', targetProgramId.toBase58())
+                DebugLogger.keyValue('Upgrade Authority', 'Unable to fetch program account')
+                DebugLogger.separator()
+                return
+            }
+            const programDataAddress = new PublicKey(programAccount.data.slice(4, 36))
             const programDataAccount = await connection.getAccountInfo(programDataAddress)
 
             // BPF Loader Upgradeable program data structure:
@@ -229,8 +235,22 @@ task('lz:oft:solana:debug', 'Manages OFTStore and OAppRegistry information')
                             } else {
                                 DebugLogger.keyValue('Update Authority', 'Not set (no token metadata)')
                             }
+
+                            // Get permanent delegate extension data
+                            const permanentDelegateData = getExtensionData(
+                                ExtensionType.PermanentDelegate,
+                                mint.tlvData
+                            )
+                            if (permanentDelegateData && permanentDelegateData.length >= 32) {
+                                // First 32 bytes should be the permanent delegate pubkey
+                                const permanentDelegate = new PublicKey(permanentDelegateData.slice(0, 32))
+                                DebugLogger.keyValue('Permanent Delegate', permanentDelegate.toBase58())
+                            } else {
+                                DebugLogger.keyValue('Permanent Delegate', 'Not set (no permanent delegate)')
+                            }
                         } else {
                             DebugLogger.keyValue('Pause Authority', 'Not available (standard SPL token)')
+                            DebugLogger.keyValue('Permanent Delegate', 'Not available (standard SPL token)')
                         }
                     } catch (extensionError) {
                         DebugLogger.keyValue('Pause Authority', `Error parsing extensions: ${extensionError}`)
