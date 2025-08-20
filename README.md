@@ -69,12 +69,14 @@ In the case of cross-chain transfer where the recipient address on the destinati
 ## Solana Program Verification
 
 1. `cargo install solana-verify --git https://github.com/Ellipsis-Labs/solana-verifiable-build`
-2. `solana-verify verify-from-repo -um --program-id Fs92vPdezafCPPGSMPbV1RXnQM6wBT9RwZJkyjDgdrT8 <repo url> --library-name oft -- --config env.OFT_ID=\'Fs92vPdezafCPPGSMPbV1RXnQM6wBT9RwZJkyjDgdrT8\'`
+2. `solana-verify verify-from-repo -um --program-id 3eZMk1HzqcbgBPjjyz9Hkd2QPxLDXCiVBx2syKUYT9oC <repo url> --library-name oft -- --config env.OFT_ID=\'3eZMk1HzqcbgBPjjyz9Hkd2QPxLDXCiVBx2syKUYT9oC\'`
+
+To see the verification status from the api, please run: `curl https://verify.osec.io/status/3eZMk1HzqcbgBPjjyz9Hkd2QPxLDXCiVBx2syKUYT9oC | jq`
 
 If there are any failures, ensure the local and on chain program hashes match:
-1. `RUSTUP_TOOLCHAIN=nightly-2025-05-01 anchor build -v -e OFT_ID=Fs92vPdezafCPPGSMPbV1RXnQM6wBT9RwZJkyjDgdrT8`
+1. `RUSTUP_TOOLCHAIN=nightly-2025-05-01 anchor build -v -e OFT_ID=3eZMk1HzqcbgBPjjyz9Hkd2QPxLDXCiVBx2syKUYT9oC`
 2. `solana-verify get-executable-hash ./target/verifiable/oft.so`
-3. `solana-verify get-program-hash --url "<mainnet rpc url>" Fs92vPdezafCPPGSMPbV1RXnQM6wBT9RwZJkyjDgdrT8`
+3. `solana-verify get-program-hash --url "<mainnet rpc url>" 3eZMk1HzqcbgBPjjyz9Hkd2QPxLDXCiVBx2syKUYT9oC`
 
 The output from steps 2 and 3 should match.
 
