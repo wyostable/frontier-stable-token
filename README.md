@@ -97,3 +97,24 @@ If the `from` address is in the deny list, the transaction will revert
 ### Caller is not allowed
 
 If a caller address calls a function with role-base access control and does not have that specific role granted to itself, the transaction will revert.
+
+
+## Configure contracts through Fireblocks
+
+1. Populate .env file with 
+
+```bash
+FIREBLOCKS_API_KEY=
+FIREBLOCKS_PRIVATE_KEY=
+FIREBLOCKS_VAULT_ACCOUNT_IDS=
+```
+
+2. Update `consts/wire.ts` with DVNs and enforced options as needed (see how it is done for existing chains)
+
+3. Update the `layerzero-mainnet.config.ts` with the new chain (see how it is done for existing chains)
+TODO iron out solana wiring -- best ux is to have end user update this config file for both evm and solana
+
+### Configure existing EVM contracts
+1. Run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts`
+
+### Configure existing Solana contract(s)

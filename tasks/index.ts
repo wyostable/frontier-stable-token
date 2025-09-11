@@ -1,5 +1,5 @@
 import './common/config.get'
-import './common/wire'
+// import './common/wire' // this will default to using evm wire only, which will throw errors for solana for now. Ideally we can integrate fireblocks sdk logic within this wire task for solana txs
 import './evm/send'
 import './solana/initConfig'
 import './solana/createOFT'
