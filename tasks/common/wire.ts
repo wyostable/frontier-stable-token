@@ -1,11 +1,20 @@
-import { PublicKey } from '@solana/web3.js'
+import 'dotenv/config'
+
+import {
+    BasePath,
+    Fireblocks,
+    TransactionOperation,
+    TransactionRequest,
+    TransferPeerPathType,
+} from '@fireblocks/ts-sdk'
+import { Connection, PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import { subtask, task } from 'hardhat/config'
 
-import { firstFactory } from '@layerzerolabs/devtools'
+import { OmniSigner, OmniTransactionReceipt, OmniTransactionResponse, firstFactory } from '@layerzerolabs/devtools'
 import { SUBTASK_LZ_SIGN_AND_SEND, types as devtoolsTypes } from '@layerzerolabs/devtools-evm-hardhat'
-import { setTransactionSizeBuffer } from '@layerzerolabs/devtools-solana'
+import { deserializeTransactionMessage, setTransactionSizeBuffer } from '@layerzerolabs/devtools-solana'
 import { type LogLevel, createLogger } from '@layerzerolabs/io-devtools'
-import { ChainType, endpointIdToChainType } from '@layerzerolabs/lz-definitions'
+import { ChainType, EndpointId, endpointIdToChainType } from '@layerzerolabs/lz-definitions'
 import { type IOApp, type OAppConfigurator, type OAppOmniGraph, configureOwnable } from '@layerzerolabs/ua-devtools'
 import {
     SUBTASK_LZ_OAPP_WIRE_CONFIGURE,
@@ -29,6 +38,145 @@ import {
 
 import type { SignAndSendTaskArgs } from '@layerzerolabs/devtools-evm-hardhat/tasks'
 
+// Utility functions for creating proper Fireblocks-compatible transactions
+function encodeTransactionForFireblocks(tx: VersionedTransaction): string {
+    return Buffer.from(tx.serialize()).toString('base64')
+}
+
+// Fireblocks signer implementation that submits transactions to Fireblocks instead of signing locally
+class OmniSignerFireblocks implements OmniSigner<OmniTransactionResponse<OmniTransactionReceipt>> {
+    constructor(
+        public eid: EndpointId,
+        private connection: Connection,
+        private fireblocks: Fireblocks,
+        private vaultAccountId: string,
+        private payer: PublicKey,
+        private assetId = 'SOL_TEST'
+    ) {}
+
+    getPoint() {
+        return { eid: this.eid, address: this.payer.toBase58() }
+    }
+
+    async sign(transaction: unknown): Promise<string> {
+        const logger = createLogger('info')
+
+        try {
+            let versionedTransaction: VersionedTransaction | undefined = undefined
+
+            if (
+                typeof transaction === 'object' &&
+                transaction &&
+                'data' in transaction &&
+                typeof transaction.data === 'string'
+            ) {
+                logger.info('Fireblocks: Handling LayerZero transaction with hex data')
+
+                const hexData = transaction.data
+                logger.info(`Fireblocks: Received hex data length: ${hexData.length} chars`)
+
+                try {
+                    logger.info('Fireblocks: Using LayerZero deserializeTransactionMessage')
+                    const solanaTransaction = deserializeTransactionMessage(hexData)
+                    logger.info('Fireblocks: Successfully deserialized LayerZero transaction')
+
+                    // Update the transaction with fresh blockhash and set proper fee payer
+                    const { blockhash } = await this.connection.getLatestBlockhash()
+                    solanaTransaction.recentBlockhash = blockhash
+                    solanaTransaction.feePayer = this.payer
+
+                    // Convert to VersionedTransaction for Fireblocks
+                    const message = new TransactionMessage({
+                        payerKey: this.payer,
+                        recentBlockhash: blockhash,
+                        instructions: solanaTransaction.instructions,
+                    })
+
+                    versionedTransaction = new VersionedTransaction(message.compileToV0Message([]))
+                    logger.info('Fireblocks: Successfully converted to VersionedTransaction for submission')
+                } catch (error) {
+                    logger.error(`Failed to deserialize LayerZero transaction: ${error}`)
+                }
+            } else {
+                logger.error(`Unsupported transaction format: ${typeof transaction}`)
+                logger.error(`Transaction: ${JSON.stringify(transaction, null, 2)}`)
+                throw new Error(
+                    `Unsupported transaction format: ${typeof transaction}. Expected VersionedTransaction, Transaction, instructions array, or serialized data`
+                )
+            }
+
+            // Encode for Fireblocks
+            if (versionedTransaction === undefined) {
+                throw new Error('Failed to create VersionedTransaction for Fireblocks submission')
+            }
+
+            const serializedTransaction = encodeTransactionForFireblocks(versionedTransaction)
+            logger.info(`Fireblocks: Encoded transaction length: ${serializedTransaction.length} chars`)
+            logger.info(`Fireblocks: Transaction encoded successfully for submission`)
+
+            const payload: TransactionRequest = {
+                operation: TransactionOperation.ProgramCall,
+                source: { type: TransferPeerPathType.VaultAccount, id: this.vaultAccountId },
+                assetId: this.assetId,
+                note: `LayerZero Wire Transaction - ${new Date().toISOString()}`,
+                feeLevel: 'MEDIUM',
+                extraParameters: {
+                    programCallData: serializedTransaction,
+                },
+            }
+
+            logger.info(`Submitting to Fireblocks: Vault=${this.vaultAccountId}, Asset=${this.assetId}`)
+
+            const result = await this.fireblocks.transactions.createTransaction({
+                transactionRequest: payload,
+            })
+
+            const transactionId = result.data?.id || 'fireblocks-pending'
+            logger.info(`Transaction submitted successfully: ID=${transactionId}`)
+            return transactionId
+        } catch (error) {
+            throw new Error(`Fireblocks transaction failed: ${error}`)
+        }
+    }
+
+    async signAndSend(transaction: unknown): Promise<OmniTransactionResponse<OmniTransactionReceipt>> {
+        const transactionHash = await this.sign(transaction)
+
+        return {
+            transactionHash,
+            wait: async () => ({
+                transactionHash,
+                blockNumber: 0,
+                blockHash: '',
+                status: 1,
+                confirmations: 0,
+                logs: [],
+                gasUsed: 0n,
+                effectiveGasPrice: 0n,
+                from: this.payer.toBase58(),
+                to: '',
+            }),
+        } as OmniTransactionResponse<OmniTransactionReceipt>
+    }
+}
+
+function createFireblocksSolanaSignerFactory(
+    fireblocks: Fireblocks,
+    vaultAccountId: string,
+    payer: PublicKey,
+    connectionFactory = createSolanaConnectionFactory(),
+    assetId = 'SOL_TEST'
+) {
+    return async (eid: EndpointId): Promise<OmniSigner<OmniTransactionResponse<OmniTransactionReceipt>>> => {
+        if (endpointIdToChainType(eid) !== ChainType.SOLANA) {
+            throw new Error(`Fireblocks Solana signer can only create signers for Solana networks. Received ${eid}`)
+        }
+
+        const connection = await connectionFactory(eid)
+        return new OmniSignerFireblocks(eid, connection, fireblocks, vaultAccountId, payer, assetId)
+    }
+}
+
 /**
  * Additional CLI arguments for our custom wire task
  */
@@ -38,6 +186,11 @@ interface Args {
     isSolanaInitConfig: boolean // For internal use only. This helps us to control which code runs depdending on whether the task ran is wire or init-config
     oappConfig: string
     internalConfigurator?: OAppConfigurator
+    fireblocksApiKey?: string
+    fireblocksPrivateKey?: string
+    fireblocksVaultAccountId?: string
+    fireblocksAssetId?: string
+    payerAddress?: string
 }
 
 /**
@@ -52,6 +205,31 @@ task(TASK_LZ_OAPP_WIRE)
     // The tasks that are using custom configurators will override this argument with the configurator of their choice
     .addParam('internalConfigurator', 'FOR INTERNAL USE ONLY', undefined, devtoolsTypes.fn, true)
     .addParam('isSolanaInitConfig', 'FOR INTERNAL USE ONLY', undefined, devtoolsTypes.boolean, true)
+    .addOptionalParam('fireblocksApiKey', 'Fireblocks API key', process.env.FIREBLOCKS_API_KEY, devtoolsTypes.string)
+    .addOptionalParam(
+        'fireblocksPrivateKey',
+        'Fireblocks private key',
+        process.env.FIREBLOCKS_PRIVATE_KEY,
+        devtoolsTypes.string
+    )
+    .addOptionalParam(
+        'fireblocksVaultAccountId',
+        'Fireblocks vault account ID',
+        process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS,
+        devtoolsTypes.string
+    )
+    .addOptionalParam(
+        'fireblocksAssetId',
+        'Fireblocks asset ID (default: SOL_TEST for testnet, SOL for mainnet)',
+        process.env.SOLANA_FIREBLOCKS_ASSET_ID || 'SOL_TEST',
+        devtoolsTypes.string
+    )
+    .addOptionalParam(
+        'payerAddress',
+        'Payer address for Solana transactions',
+        process.env.SOLANA_PAYER_ADDRESS,
+        devtoolsTypes.string
+    )
     .setAction(async (args: Args, hre, runSuper) => {
         const logger = createLogger(args.logLevel)
 
@@ -70,9 +248,56 @@ task(TASK_LZ_OAPP_WIRE)
         //
         //
 
-        // construct the user's keypair via the SOLANA_PRIVATE_KEY env var
-        const keypair = (await useWeb3Js()).web3JsKeypair // note: this can be replaced with getSolanaKeypair() if we are okay to export that
-        const userAccount = keypair.publicKey
+        const useFireblocks =
+            args.fireblocksApiKey && args.fireblocksPrivateKey && args.fireblocksVaultAccountId && args.payerAddress
+
+        let keypair: Awaited<ReturnType<typeof useWeb3Js>>['web3JsKeypair'] | undefined,
+            userAccount: PublicKey,
+            fireblocks: Fireblocks | undefined,
+            fireblocksConfig: {
+                fireblocks?: Fireblocks
+                vaultAccountId?: string
+                assetId?: string
+                payer?: PublicKey
+            } = {}
+
+        if (useFireblocks) {
+            logger.info('Using Fireblocks for Solana transaction signing')
+
+            const apiKey = args.fireblocksApiKey
+            const privateKey = args.fireblocksPrivateKey
+            const vaultAccountId = args.fireblocksVaultAccountId
+            const payerAddress = args.payerAddress
+
+            if (!apiKey || !privateKey || !vaultAccountId || !payerAddress) {
+                throw new Error(
+                    'Missing required Fireblocks configuration. Please set environment variables: FIREBLOCKS_API_KEY, FIREBLOCKS_PRIVATE_KEY, FIREBLOCKS_VAULT_ACCOUNT_IDS, and SOLANA_PAYER_ADDRESS.'
+                )
+            }
+
+            fireblocks = new Fireblocks({
+                apiKey: apiKey,
+                basePath: BasePath.US,
+                secretKey: privateKey,
+            })
+
+            userAccount = new PublicKey(payerAddress)
+
+            fireblocksConfig = {
+                fireblocks,
+                vaultAccountId,
+                assetId: args.fireblocksAssetId,
+                payer: userAccount,
+            }
+
+            logger.info(`Fireblocks configuration loaded: VaultId=${vaultAccountId}, Payer=${userAccount.toBase58()}`)
+        } else {
+            logger.info('Using local keypair for Solana transaction signing')
+
+            // construct the user's keypair via the SOLANA_PRIVATE_KEY env var
+            keypair = (await useWeb3Js()).web3JsKeypair
+            userAccount = keypair.publicKey
+        }
 
         const solanaEid = await findSolanaEndpointIdInGraph(hre, args.oappConfig)
         const solanaDeployment = getSolanaDeployment(solanaEid)
@@ -103,8 +328,20 @@ task(TASK_LZ_OAPP_WIRE)
         // We'll need SDKs to be able to use devtools
         const sdkFactory = createSdkFactory(userAccount, programId, connectionFactory)
 
-        // We'll also need a signer factory
-        const solanaSignerFactory = createSolanaSignerFactory(keypair, connectionFactory, args.multisigKey)
+        // We'll also need a signer factory - use Fireblocks or local keypair based on configuration
+        const solanaSignerFactory = useFireblocks
+            ? createFireblocksSolanaSignerFactory(
+                  fireblocksConfig.fireblocks as Fireblocks,
+                  fireblocksConfig.vaultAccountId as string,
+                  fireblocksConfig.payer as PublicKey,
+                  connectionFactory,
+                  fireblocksConfig.assetId as string
+              )
+            : createSolanaSignerFactory(
+                  keypair as Awaited<ReturnType<typeof useWeb3Js>>['web3JsKeypair'],
+                  connectionFactory,
+                  args.multisigKey
+              )
 
         //
         //
@@ -198,6 +435,31 @@ task(TASK_LZ_OAPP_WIRE)
 // that the logs will say "Wiring OApp" instead of "Transferring ownership"
 task(TASK_LZ_OWNABLE_TRANSFER_OWNERSHIP)
     .addParam('multisigKey', 'The MultiSig key', undefined, publicKeyType, true)
+    .addOptionalParam('fireblocksApiKey', 'Fireblocks API key', process.env.FIREBLOCKS_API_KEY, devtoolsTypes.string)
+    .addOptionalParam(
+        'fireblocksPrivateKey',
+        'Fireblocks private key',
+        process.env.FIREBLOCKS_PRIVATE_KEY,
+        devtoolsTypes.string
+    )
+    .addOptionalParam(
+        'fireblocksVaultAccountId',
+        'Fireblocks vault account ID',
+        process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS,
+        devtoolsTypes.string
+    )
+    .addOptionalParam(
+        'fireblocksAssetId',
+        'Fireblocks asset ID (default: SOL_TEST for testnet, SOL for mainnet)',
+        process.env.SOLANA_FIREBLOCKS_ASSET_ID || 'SOL_TEST',
+        devtoolsTypes.string
+    )
+    .addOptionalParam(
+        'payerAddress',
+        'Payer address for Solana transactions',
+        process.env.SOLANA_PAYER_ADDRESS,
+        devtoolsTypes.string
+    )
     .setAction(async (args: Args, hre) => {
         return hre.run(TASK_LZ_OAPP_WIRE, { ...args, internalConfigurator: configureOwnable })
     })

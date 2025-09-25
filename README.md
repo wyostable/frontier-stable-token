@@ -104,17 +104,25 @@ If a caller address calls a function with role-base access control and does not 
 1. Populate .env file with 
 
 ```bash
+RPC_URL_SOLANA=
+RPC_URL_SOLANA_TESTNET=
 FIREBLOCKS_API_KEY=
 FIREBLOCKS_PRIVATE_KEY=
 FIREBLOCKS_VAULT_ACCOUNT_IDS=
+SOLANA_FIREBLOCKS_ASSET_ID= # SOL_TEST or SOL
+SOLANA_PAYER_ADDRESS=
 ```
 
-2. Update `consts/wire.ts` with DVNs and enforced options as needed (see how it is done for existing chains)
+2. Update `hardhat.config.ts` with the new chain if needed (see how it is done for existing chains)
 
-3. Update the `layerzero-mainnet.config.ts` with the new chain (see how it is done for existing chains)
-TODO iron out solana wiring -- best ux is to have end user update this config file for both evm and solana
+3. Update `consts/wire.ts` with DVNs and enforced options as needed (see how it is done for existing chains)
 
-### Configure existing EVM contracts
-1. Run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts`
+      a. Make sure to update the `getRequiredDVNs` and `getOptionalDVNs` functions if introducing new dvns
+  
 
-### Configure existing Solana contract(s)
+4. Update the `layerzero-mainnet.config.ts` with the new chain (see how it is done for existing chains)
+
+### Configure existing contracts
+1. Set the evm vault account id within the `FIREBLOCKS_VAULT_ACCOUNT_IDS` environment variable then run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts --skip-connections-from-eids 30168` 
+2.  Set the solana vault account id within the `FIREBLOCKS_VAULT_ACCOUNT_IDS` environment variable then run `npx hardhat lz:oft:solana:init-config --oapp-config layerzero-mainnet.config.ts`
+3. Finally, run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts` to complete wiring
