@@ -104,36 +104,9 @@ If a caller address calls a function with role-base access control and does not 
 ### Setup
 1. Copy the `.env.example` file and rename it to `.env`. Populate the variables under the `Fireblocks environment configuration` section as instructed
 
-If wiring to a new chain, follows steps 2 and 3. Otherwise, skip to step 4. 
+2. Update `consts/wire.ts` as needed
 
-2. If wiring to a new chain, update the `networks` object in the `hardhat.config.ts` with the new chain's information as follows, similar to existing chains:
-
-```
-        newChain: {
-            eid: EndpointId.NEW_CHAIN_V2_MAINNET,
-            url: process.env.RPC_URL_NEW_CHAIN_MAINNET || '<public rpc of new chain>',
-            chainId: <chain id of new chain, see https://chainlist.org/>,
-            fireblocks: {
-                privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
-                apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
-                    : [],
-                apiBaseUrl: ApiBaseUrl.Production,
-            },
-            // accounts,
-        },
-```
-
-3. If wiring to a new chain, update the `CONTRACTS` array within the `layerzero-mainnet.config.ts` file to include the new chain as follows, similar to existing chains:
-
-```
-    { eid: EndpointId.NEW_CHAIN_V2_MAINNET, contractName: 'FRNTAdapter' },
-```
-
-4. Update `consts/wire.ts` as needed
-
-      a. If introducing a new chain, ensure the `DVNS`, `ENFORCED_OPTIONS`, and `MULTISIGS` objects are updated, similar to existing chains
+      a. Update the `DVNS`, `ENFORCED_OPTIONS`, and `MULTISIGS` as needed, similar to existing chains
 
       b. If introducing new dvns, make sure to update the `getRequiredDVNs` and `getOptionalDVNs` functions
 
@@ -141,5 +114,7 @@ If wiring to a new chain, follows steps 2 and 3. Otherwise, skip to step 4.
   
 
 ### Configure contracts
-1. If introducing a new chain, run `npx hardhat lz:oft:solana:init-config --oapp-config layerzero-mainnet.config.ts` to initialize the Solana accounts
-2. To configure, run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts` 
+
+To wire, run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts` 
+
+To transfer ownership, run `npx hardhat lz:ownable:transfer-ownership --oapp-config layerzero-mainnet.config.ts`
