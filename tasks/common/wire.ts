@@ -215,7 +215,7 @@ task(TASK_LZ_OAPP_WIRE)
     .addOptionalParam(
         'fireblocksVaultAccountId',
         'Fireblocks vault account ID',
-        process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS,
+        process.env.SOLANA_FIREBLOCKS_VAULT_ACCOUNT_IDS,
         devtoolsTypes.string
     )
     .addOptionalParam(
@@ -248,7 +248,7 @@ task(TASK_LZ_OAPP_WIRE)
         //
         //
 
-        const useFireblocks =
+        const useFireblocksForSolana =
             args.fireblocksApiKey && args.fireblocksPrivateKey && args.fireblocksVaultAccountId && args.payerAddress
 
         let keypair: Awaited<ReturnType<typeof useWeb3Js>>['web3JsKeypair'] | undefined,
@@ -261,7 +261,7 @@ task(TASK_LZ_OAPP_WIRE)
                 payer?: PublicKey
             } = {}
 
-        if (useFireblocks) {
+        if (useFireblocksForSolana) {
             logger.info('Using Fireblocks for Solana transaction signing')
 
             const apiKey = args.fireblocksApiKey
@@ -329,7 +329,7 @@ task(TASK_LZ_OAPP_WIRE)
         const sdkFactory = createSdkFactory(userAccount, programId, connectionFactory)
 
         // We'll also need a signer factory - use Fireblocks or local keypair based on configuration
-        const solanaSignerFactory = useFireblocks
+        const solanaSignerFactory = useFireblocksForSolana
             ? createFireblocksSolanaSignerFactory(
                   fireblocksConfig.fireblocks as Fireblocks,
                   fireblocksConfig.vaultAccountId as string,

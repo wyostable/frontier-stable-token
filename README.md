@@ -101,28 +101,45 @@ If a caller address calls a function with role-base access control and does not 
 
 ## Configure contracts through Fireblocks
 
-1. Populate .env file with 
+### Setup
+1. Copy the `.env.example` file and rename it to `.env`. Populate the variables under the `Fireblocks environment configuration` section as instructed
 
-```bash
-RPC_URL_SOLANA=
-RPC_URL_SOLANA_TESTNET=
-FIREBLOCKS_API_KEY=
-FIREBLOCKS_PRIVATE_KEY=
-FIREBLOCKS_VAULT_ACCOUNT_IDS=
-SOLANA_FIREBLOCKS_ASSET_ID= # SOL_TEST or SOL
-SOLANA_PAYER_ADDRESS=
+If wiring to a new chain, follows steps 2 and 3. Otherwise, skip to step 4. 
+
+2. If wiring to a new chain, update the `networks` object in the `hardhat.config.ts` with the new chain's information as follows, similar to existing chains:
+
+```
+        newChain: {
+            eid: EndpointId.NEW_CHAIN_V2_MAINNET,
+            url: process.env.RPC_URL_NEW_CHAIN_MAINNET || '<public rpc of new chain>',
+            chainId: <chain id of new chain, see https://chainlist.org/>,
+            fireblocks: {
+                privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
+                apiKey: process.env.FIREBLOCKS_API_KEY || '',
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                    : [],
+                apiBaseUrl: ApiBaseUrl.Production,
+            },
+            // accounts,
+        },
 ```
 
-2. Update `hardhat.config.ts` with the new chain if needed (see how it is done for existing chains)
+3. If wiring to a new chain, update the `CONTRACTS` array within the `layerzero-mainnet.config.ts` file to include the new chain as follows, similar to existing chains:
 
-3. Update `consts/wire.ts` with DVNs and enforced options as needed (see how it is done for existing chains)
+```
+    { eid: EndpointId.NEW_CHAIN_V2_MAINNET, contractName: 'FRNTAdapter' },
+```
 
-      a. Make sure to update the `getRequiredDVNs` and `getOptionalDVNs` functions if introducing new dvns
+4. Update `consts/wire.ts` as needed
+
+      a. If introducing a new chain, ensure the `DVNS`, `ENFORCED_OPTIONS`, and `MULTISIGS` objects are updated, similar to existing chains
+
+      b. If introducing new dvns, make sure to update the `getRequiredDVNs` and `getOptionalDVNs` functions
+
+      c. If making changes to optional dvns, ensure `optionalDVNThreshold` within `layerzero-mainnet.config.ts` is updated as well
   
 
-4. Update the `layerzero-mainnet.config.ts` with the new chain (see how it is done for existing chains)
-
-### Configure existing contracts
-1. Set the evm vault account id within the `FIREBLOCKS_VAULT_ACCOUNT_IDS` environment variable then run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts --skip-connections-from-eids 30168` 
-2.  Set the solana vault account id within the `FIREBLOCKS_VAULT_ACCOUNT_IDS` environment variable then run `npx hardhat lz:oft:solana:init-config --oapp-config layerzero-mainnet.config.ts`
-3. Finally, run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts` to complete wiring
+### Configure contracts
+1. If introducing a new chain, run `npx hardhat lz:oft:solana:init-config --oapp-config layerzero-mainnet.config.ts` to initialize the Solana accounts
+2. To configure, run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts` 
