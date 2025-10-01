@@ -1,20 +1,14 @@
 import 'dotenv/config'
 
-import {
-    BasePath,
-    Fireblocks,
-    TransactionOperation,
-    TransactionRequest,
-    TransferPeerPathType,
-} from '@fireblocks/ts-sdk'
-import { Connection, PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js'
+import { BasePath, Fireblocks } from '@fireblocks/ts-sdk'
+import { PublicKey } from '@solana/web3.js'
 import { subtask, task } from 'hardhat/config'
 
-import { OmniSigner, OmniTransactionReceipt, OmniTransactionResponse, firstFactory } from '@layerzerolabs/devtools'
+import { firstFactory } from '@layerzerolabs/devtools'
 import { SUBTASK_LZ_SIGN_AND_SEND, types as devtoolsTypes } from '@layerzerolabs/devtools-evm-hardhat'
-import { deserializeTransactionMessage, setTransactionSizeBuffer } from '@layerzerolabs/devtools-solana'
+import { setTransactionSizeBuffer } from '@layerzerolabs/devtools-solana'
 import { type LogLevel, createLogger } from '@layerzerolabs/io-devtools'
-import { ChainType, EndpointId, endpointIdToChainType } from '@layerzerolabs/lz-definitions'
+import { ChainType, endpointIdToChainType } from '@layerzerolabs/lz-definitions'
 import { type IOApp, type OAppConfigurator, type OAppOmniGraph, configureOwnable } from '@layerzerolabs/ua-devtools'
 import {
     SUBTASK_LZ_OAPP_WIRE_CONFIGURE,
@@ -30,6 +24,7 @@ import { publicKey as publicKeyType } from './types'
 import {
     DebugLogger,
     KnownErrors,
+    createFireblocksSolanaSignerFactory,
     createSdkFactory,
     createSolanaConnectionFactory,
     createSolanaSignerFactory,
@@ -37,145 +32,6 @@ import {
 } from './utils'
 
 import type { SignAndSendTaskArgs } from '@layerzerolabs/devtools-evm-hardhat/tasks'
-
-// Utility functions for creating proper Fireblocks-compatible transactions
-function encodeTransactionForFireblocks(tx: VersionedTransaction): string {
-    return Buffer.from(tx.serialize()).toString('base64')
-}
-
-// Fireblocks signer implementation that submits transactions to Fireblocks instead of signing locally
-class OmniSignerFireblocks implements OmniSigner<OmniTransactionResponse<OmniTransactionReceipt>> {
-    constructor(
-        public eid: EndpointId,
-        private connection: Connection,
-        private fireblocks: Fireblocks,
-        private vaultAccountId: string,
-        private payer: PublicKey,
-        private assetId = 'SOL_TEST'
-    ) {}
-
-    getPoint() {
-        return { eid: this.eid, address: this.payer.toBase58() }
-    }
-
-    async sign(transaction: unknown): Promise<string> {
-        const logger = createLogger('info')
-
-        try {
-            let versionedTransaction: VersionedTransaction | undefined = undefined
-
-            if (
-                typeof transaction === 'object' &&
-                transaction &&
-                'data' in transaction &&
-                typeof transaction.data === 'string'
-            ) {
-                logger.info('Fireblocks: Handling LayerZero transaction with hex data')
-
-                const hexData = transaction.data
-                logger.info(`Fireblocks: Received hex data length: ${hexData.length} chars`)
-
-                try {
-                    logger.info('Fireblocks: Using LayerZero deserializeTransactionMessage')
-                    const solanaTransaction = deserializeTransactionMessage(hexData)
-                    logger.info('Fireblocks: Successfully deserialized LayerZero transaction')
-
-                    // Update the transaction with fresh blockhash and set proper fee payer
-                    const { blockhash } = await this.connection.getLatestBlockhash()
-                    solanaTransaction.recentBlockhash = blockhash
-                    solanaTransaction.feePayer = this.payer
-
-                    // Convert to VersionedTransaction for Fireblocks
-                    const message = new TransactionMessage({
-                        payerKey: this.payer,
-                        recentBlockhash: blockhash,
-                        instructions: solanaTransaction.instructions,
-                    })
-
-                    versionedTransaction = new VersionedTransaction(message.compileToV0Message([]))
-                    logger.info('Fireblocks: Successfully converted to VersionedTransaction for submission')
-                } catch (error) {
-                    logger.error(`Failed to deserialize LayerZero transaction: ${error}`)
-                }
-            } else {
-                logger.error(`Unsupported transaction format: ${typeof transaction}`)
-                logger.error(`Transaction: ${JSON.stringify(transaction, null, 2)}`)
-                throw new Error(
-                    `Unsupported transaction format: ${typeof transaction}. Expected VersionedTransaction, Transaction, instructions array, or serialized data`
-                )
-            }
-
-            // Encode for Fireblocks
-            if (versionedTransaction === undefined) {
-                throw new Error('Failed to create VersionedTransaction for Fireblocks submission')
-            }
-
-            const serializedTransaction = encodeTransactionForFireblocks(versionedTransaction)
-            logger.info(`Fireblocks: Encoded transaction length: ${serializedTransaction.length} chars`)
-            logger.info(`Fireblocks: Transaction encoded successfully for submission`)
-
-            const payload: TransactionRequest = {
-                operation: TransactionOperation.ProgramCall,
-                source: { type: TransferPeerPathType.VaultAccount, id: this.vaultAccountId },
-                assetId: this.assetId,
-                note: `LayerZero Wire Transaction - ${new Date().toISOString()}`,
-                feeLevel: 'MEDIUM',
-                extraParameters: {
-                    programCallData: serializedTransaction,
-                },
-            }
-
-            logger.info(`Submitting to Fireblocks: Vault=${this.vaultAccountId}, Asset=${this.assetId}`)
-
-            const result = await this.fireblocks.transactions.createTransaction({
-                transactionRequest: payload,
-            })
-
-            const transactionId = result.data?.id || 'fireblocks-pending'
-            logger.info(`Transaction submitted successfully: ID=${transactionId}`)
-            return transactionId
-        } catch (error) {
-            throw new Error(`Fireblocks transaction failed: ${error}`)
-        }
-    }
-
-    async signAndSend(transaction: unknown): Promise<OmniTransactionResponse<OmniTransactionReceipt>> {
-        const transactionHash = await this.sign(transaction)
-
-        return {
-            transactionHash,
-            wait: async () => ({
-                transactionHash,
-                blockNumber: 0,
-                blockHash: '',
-                status: 1,
-                confirmations: 0,
-                logs: [],
-                gasUsed: 0n,
-                effectiveGasPrice: 0n,
-                from: this.payer.toBase58(),
-                to: '',
-            }),
-        } as OmniTransactionResponse<OmniTransactionReceipt>
-    }
-}
-
-function createFireblocksSolanaSignerFactory(
-    fireblocks: Fireblocks,
-    vaultAccountId: string,
-    payer: PublicKey,
-    connectionFactory = createSolanaConnectionFactory(),
-    assetId = 'SOL_TEST'
-) {
-    return async (eid: EndpointId): Promise<OmniSigner<OmniTransactionResponse<OmniTransactionReceipt>>> => {
-        if (endpointIdToChainType(eid) !== ChainType.SOLANA) {
-            throw new Error(`Fireblocks Solana signer can only create signers for Solana networks. Received ${eid}`)
-        }
-
-        const connection = await connectionFactory(eid)
-        return new OmniSignerFireblocks(eid, connection, fireblocks, vaultAccountId, payer, assetId)
-    }
-}
 
 /**
  * Additional CLI arguments for our custom wire task

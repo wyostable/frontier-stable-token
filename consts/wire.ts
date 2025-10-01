@@ -2,8 +2,6 @@ import { EndpointId } from '@layerzerolabs/lz-definitions'
 import { ExecutorOptionType } from '@layerzerolabs/lz-v2-utilities'
 import { OAppEnforcedOption } from '@layerzerolabs/toolbox-hardhat'
 
-import { fetchMetadata, getEndpointIdDeployment, isSolanaDeployment } from './utils'
-
 export const DVNS = {
     GOOGLE_CLOUD: {
         [EndpointId.ARBITRUM_V2_MAINNET]: '0xd56e4eab23cb81f43168f9f45211eb027b9ac7cc',
@@ -112,74 +110,4 @@ export const getMultisigAddress = (eid: EndpointId): string => {
     }
 
     return address
-}
-
-export const getSendLibrary = async (eid: EndpointId): Promise<string> => {
-    const metadata = await fetchMetadata()
-    const deployment = getEndpointIdDeployment(eid, metadata)
-
-    if (!deployment) {
-        throw new Error(`Can't find lz deployments for eid: "${eid}"`)
-    }
-
-    const { sendUln302 } = deployment
-
-    if (!sendUln302) {
-        throw new Error(`Can't find sendUln302 for eid: "${eid}"`)
-    }
-
-    if (!sendUln302.address) {
-        throw new Error(`Can't find sendUln302 address for deployment with eid: "${eid}"`)
-    }
-
-    return sendUln302.address
-}
-
-export const getReceiveLibrary = async (eid: EndpointId): Promise<string> => {
-    const metadata = await fetchMetadata()
-    const deployment = getEndpointIdDeployment(eid, metadata)
-
-    if (!deployment) {
-        throw new Error(`Can't find lz deployments for eid: "${eid}"`)
-    }
-
-    const { receiveUln302 } = deployment
-
-    if (!receiveUln302) {
-        throw new Error(`Can't find receiveUln302 for eid: "${eid}"`)
-    }
-
-    if (!receiveUln302.address) {
-        throw new Error(`Can't find receiveUln302 address for deployment with eid: "${eid}"`)
-    }
-
-    return receiveUln302.address
-}
-
-export const getExecutor = async (eid: EndpointId): Promise<string> => {
-    const metadata = await fetchMetadata()
-    const deployment = getEndpointIdDeployment(eid, metadata)
-
-    if (!deployment) {
-        throw new Error(`Can't find lz deployments for eid: "${eid}"`)
-    }
-
-    const { executor } = deployment
-
-    if (!executor) {
-        throw new Error(`Can't find executor for eid: "${eid}"`)
-    }
-
-    if (isSolanaDeployment(deployment)) {
-        if (!executor.pda) {
-            throw new Error(`Can't find executor PDA for Solana deployment`)
-        }
-        return executor.pda
-    }
-
-    if (!executor.address) {
-        throw new Error(`Can't find executor address for deployment with eid: "${eid}"`)
-    }
-
-    return executor.address
 }

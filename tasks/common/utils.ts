@@ -1,6 +1,7 @@
 import assert from 'assert'
 
-import { Connection, Keypair, PublicKey } from '@solana/web3.js'
+import { Fireblocks } from '@fireblocks/ts-sdk'
+import { Connection, Keypair, PublicKey, VersionedTransaction } from '@solana/web3.js'
 
 import {
     OmniPoint,
@@ -23,6 +24,7 @@ import { Options } from '@layerzerolabs/lz-v2-utilities'
 import { IOApp } from '@layerzerolabs/ua-devtools'
 import { createOAppFactory } from '@layerzerolabs/ua-devtools-evm'
 import { createOFTFactory } from '@layerzerolabs/ua-devtools-solana'
+import { OmniSignerFireblocks } from '../fireblocks/OmniSignerFireblocks'
 
 export const createSolanaConnectionFactory = () =>
     createConnectionFactory(
@@ -85,6 +87,23 @@ export const createSolanaSignerFactory = (
         return multisigKey
             ? new OmniSignerSolanaSquads(eid, await connectionFactory(eid), multisigKey, wallet)
             : new OmniSignerSolana(eid, await connectionFactory(eid), wallet)
+    }
+}
+
+export function createFireblocksSolanaSignerFactory(
+    fireblocks: Fireblocks,
+    vaultAccountId: string,
+    payer: PublicKey,
+    connectionFactory = createSolanaConnectionFactory(),
+    assetId = 'SOL_TEST'
+) {
+    return async (eid: EndpointId): Promise<OmniSigner<OmniTransactionResponse<OmniTransactionReceipt>>> => {
+        if (endpointIdToChainType(eid) !== ChainType.SOLANA) {
+            throw new Error(`Fireblocks Solana signer can only create signers for Solana networks. Received ${eid}`)
+        }
+
+        const connection = await connectionFactory(eid)
+        return new OmniSignerFireblocks(eid, connection, fireblocks, vaultAccountId, payer, assetId)
     }
 }
 
