@@ -39,7 +39,7 @@
         "@layerzerolabs/lz-evm-protocol-v2": "^3.0.86",
         "@layerzerolabs/lz-evm-sdk-v2": "^3.0.75",
         "@layerzerolabs/lz-evm-v1-0.7": "^3.0.86",
-        "@layerzerolabs/lz-solana-sdk-v2": "^3.0.136",
+        "@layerzerolabs/lz-solana-sdk-v2": "^3.0.86",
         "@layerzerolabs/lz-v2-utilities": "^3.0.86",
         "@layerzerolabs/oapp-evm": "^0.3.2",
         "@layerzerolabs/oft-evm": "^3.1.3",

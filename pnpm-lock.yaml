@@ -67,7 +67,7 @@ devDependencies:
     specifier: ^3.0.86
     version: 3.0.124(@openzeppelin/contracts-upgradeable@5.4.0)(@openzeppelin/contracts@5.4.0)(hardhat-deploy@0.12.4)
   '@layerzerolabs/lz-solana-sdk-v2':
-    specifier: ^3.0.136
+    specifier: ^3.0.86
     version: 3.0.136(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)
   '@layerzerolabs/lz-v2-utilities':
     specifier: ^3.0.86
