@@ -102,9 +102,11 @@ If a caller address calls a function with role-base access control and does not 
 ## Configure contracts through Fireblocks
 
 ### Setup
-1. Copy the `.env.example` file and rename it to `.env`. Populate the variables under the `Fireblocks environment configuration` section as instructed
+1. Run `pnpm install`
 
-2. Update `consts/wire.ts` as needed
+2. Copy the `.env.example` file and rename it to `.env`. Populate the variables under the `Fireblocks environment configuration` section as instructed
+
+3. Update `consts/wire.ts` as needed
 
       a. Update the `DVNS`, `ENFORCED_OPTIONS`, and `MULTISIGS` as needed, similar to existing chains
 
@@ -115,6 +117,8 @@ If a caller address calls a function with role-base access control and does not 
 
 ### Configure contracts
 
-To wire, run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts` 
+First, initialize accounts on Solana: `npx hardhat lz:oft:solana:init-config --oapp-config layerzero-mainnet.config.ts --ci`
+
+Then to wire, run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts --ci` 
 
 To transfer ownership, run `npx hardhat lz:ownable:transfer-ownership --oapp-config layerzero-mainnet.config.ts`
