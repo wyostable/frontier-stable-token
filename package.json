@@ -101,6 +101,7 @@
     "engines": {
         "node": ">=18.16.0"
     },
+    "packageManager": "pnpm@8.14.0",
     "pnpm": {
         "overrides": {
             "@solana/web3.js": "^1.98.0",
