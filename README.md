@@ -102,7 +102,7 @@ If a caller address calls a function with role-base access control and does not 
 ## Configure contracts through Fireblocks
 
 ### Setup
-1. Run `pnpm install`
+1. Install pnpm if you do not have it already with `npm install -g pnpm` then run `pnpm install`
 
 2. Copy the `.env.example` file and rename it to `.env`. Populate the variables under the `Fireblocks environment configuration` section as instructed
 
