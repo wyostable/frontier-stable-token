@@ -45,6 +45,7 @@ export const ENFORCED_OPTIONS: Partial<Record<EndpointId, OAppEnforcedOption[]>>
     [EndpointId.BASESEP_V2_TESTNET]: [{ msgType: 1, optionType: ExecutorOptionType.LZ_RECEIVE, gas: 120000, value: 0 }],
     [EndpointId.OPTSEP_V2_TESTNET]: [{ msgType: 1, optionType: ExecutorOptionType.LZ_RECEIVE, gas: 120000, value: 0 }],
     [EndpointId.SEPOLIA_V2_TESTNET]: [{ msgType: 1, optionType: ExecutorOptionType.LZ_RECEIVE, gas: 120000, value: 0 }],
+    [EndpointId.HEDERA_V2_TESTNET]: [{ msgType: 1, optionType: ExecutorOptionType.LZ_RECEIVE, gas: 120000, value: 0 }],
     [EndpointId.SOLANA_V2_TESTNET]: [
         { msgType: 1, optionType: ExecutorOptionType.LZ_RECEIVE, gas: 250000, value: 2539280 },
     ],
@@ -86,6 +87,7 @@ export const MULTISIGS: Partial<Record<EndpointId, string>> = {
     [EndpointId.BASESEP_V2_TESTNET]: 'TODO',
     [EndpointId.OPTSEP_V2_TESTNET]: 'TODO',
     [EndpointId.SEPOLIA_V2_TESTNET]: 'TODO',
+    [EndpointId.HEDERA_V2_TESTNET]: 'TODO',
     [EndpointId.SOLANA_V2_TESTNET]: 'TODO',
 } as const
 

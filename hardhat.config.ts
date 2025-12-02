@@ -149,6 +149,20 @@ const config: HardhatUserConfig = {
             },
             // accounts,
         },
+        'hedera-testnet': {
+            eid: EndpointId.HEDERA_V2_TESTNET,
+            url: process.env.RPC_URL_HEDERA_TESTNET || 'https://testnet.hashio.io/api',
+            chainId: 296,
+            fireblocks: {
+                privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
+                apiKey: process.env.FIREBLOCKS_API_KEY || '',
+                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                    : [],
+                apiBaseUrl: ApiBaseUrl.Production,
+            },
+            // accounts,
+        },
 
         // Mainnet networks
         arbitrum: {

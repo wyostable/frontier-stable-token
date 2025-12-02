@@ -12,6 +12,7 @@ const CONTRACTS: OmniPointHardhat[] = [
     { eid: EndpointId.ARBSEP_V2_TESTNET, contractName: 'FRNTAdapter' },
     { eid: EndpointId.OPTSEP_V2_TESTNET, contractName: 'FRNTAdapter' },
     { eid: EndpointId.BASESEP_V2_TESTNET, contractName: 'FRNTAdapter' },
+    { eid: EndpointId.HEDERA_V2_TESTNET, contractName: 'FRNTAdapter' },
     { eid: EndpointId.SOLANA_V2_TESTNET, address: getOftStoreAddress(EndpointId.SOLANA_V2_TESTNET) },
 ]
 
