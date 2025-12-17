@@ -81,14 +81,14 @@ export const MULTISIGS: Partial<Record<EndpointId, string>> = {
     [EndpointId.SOLANA_V2_MAINNET]: '3FL7iZaerXVygpPAFtXyxoCGdoUt11eiSBYkko6mMD8x',
 
     // Testnet addresses
-    [EndpointId.AMOY_V2_TESTNET]: 'TODO',
-    [EndpointId.ARBSEP_V2_TESTNET]: 'TODO',
-    [EndpointId.AVALANCHE_V2_TESTNET]: 'TODO',
-    [EndpointId.BASESEP_V2_TESTNET]: 'TODO',
-    [EndpointId.OPTSEP_V2_TESTNET]: 'TODO',
-    [EndpointId.SEPOLIA_V2_TESTNET]: 'TODO',
-    [EndpointId.HEDERA_V2_TESTNET]: 'TODO',
-    [EndpointId.SOLANA_V2_TESTNET]: 'TODO',
+    [EndpointId.AMOY_V2_TESTNET]: '0x8cE5b7298707F672ae8C1e8eba69Fe4f840Ee0eC',
+    [EndpointId.ARBSEP_V2_TESTNET]: '0x8cE5b7298707F672ae8C1e8eba69Fe4f840Ee0eC',
+    [EndpointId.AVALANCHE_V2_TESTNET]: '0x8cE5b7298707F672ae8C1e8eba69Fe4f840Ee0eC',
+    [EndpointId.BASESEP_V2_TESTNET]: '0x8cE5b7298707F672ae8C1e8eba69Fe4f840Ee0eC',
+    [EndpointId.OPTSEP_V2_TESTNET]: '0x8cE5b7298707F672ae8C1e8eba69Fe4f840Ee0eC',
+    [EndpointId.SEPOLIA_V2_TESTNET]: '0x8cE5b7298707F672ae8C1e8eba69Fe4f840Ee0eC',
+    [EndpointId.HEDERA_V2_TESTNET]: '0x8cE5b7298707F672ae8C1e8eba69Fe4f840Ee0eC',
+    [EndpointId.SOLANA_V2_TESTNET]: '4gN2LgUyrxqjChDP3mDFbKNyDrZsPYS81NHQ4yhd9MHe',
 } as const
 
 // Helper functions

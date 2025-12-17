@@ -1,7 +1,7 @@
 import { EndpointId } from '@layerzerolabs/lz-definitions'
 import { OmniPointHardhat } from '@layerzerolabs/toolbox-hardhat'
 
-import { getEnforcedOptions } from './consts/wire'
+import { getEnforcedOptions, getMultisigAddress } from './consts/wire'
 import { getOftStoreAddress } from './tasks/solana'
 
 // Define all contracts
@@ -51,6 +51,10 @@ export default async function () {
     return {
         contracts: CONTRACTS.map((contract) => ({
             contract,
+            config: {
+                owner: getMultisigAddress(contract.eid),
+                delegate: getMultisigAddress(contract.eid),
+            },
         })),
         connections,
     }
