@@ -1,15 +1,7 @@
 import { EndpointId } from '@layerzerolabs/lz-definitions'
 import { OmniPointHardhat } from '@layerzerolabs/toolbox-hardhat'
 
-import {
-    getEnforcedOptions,
-    getExecutor,
-    getMultisigAddress,
-    getOptionalDVNs,
-    getReceiveLibrary,
-    getRequiredDVNs,
-    getSendLibrary,
-} from './consts/wire'
+import { getEnforcedOptions, getMultisigAddress, getOptionalDVNs, getRequiredDVNs } from './consts/wire'
 import { getOftStoreAddress } from './tasks/solana'
 
 // Define all contracts
@@ -44,11 +36,8 @@ const generateConnections = async () => {
             from,
             to,
             config: {
-                sendLibrary: await getSendLibrary(from.eid),
-                receiveLibraryConfig: { receiveLibrary: await getReceiveLibrary(from.eid), gracePeriod: 0n },
                 enforcedOptions: getEnforcedOptions(to.eid),
                 sendConfig: {
-                    executorConfig: { maxMessageSize: 10000, executor: await getExecutor(from.eid) },
                     ulnConfig: {
                         requiredDVNs: getRequiredDVNs(from.eid),
                         optionalDVNs: getOptionalDVNs(from.eid),

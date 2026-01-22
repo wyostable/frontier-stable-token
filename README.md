@@ -101,20 +101,24 @@ If a caller address calls a function with role-base access control and does not 
 
 ## Configure contracts through Fireblocks
 
-1. Populate .env file with 
+### Setup
+1. Install pnpm if you do not have it already with `npm install -g pnpm` then run `pnpm install`
 
-```bash
-FIREBLOCKS_API_KEY=
-FIREBLOCKS_PRIVATE_KEY=
-FIREBLOCKS_VAULT_ACCOUNT_IDS=
-```
+2. Copy the `.env.example` file and rename it to `.env`. Populate the variables under the `Fireblocks environment configuration` section as instructed
 
-2. Update `consts/wire.ts` with DVNs and enforced options as needed (see how it is done for existing chains)
+3. Update `consts/wire.ts` as needed
 
-3. Update the `layerzero-mainnet.config.ts` with the new chain (see how it is done for existing chains)
-TODO iron out solana wiring -- best ux is to have end user update this config file for both evm and solana
+      a. Update the `DVNS`, `ENFORCED_OPTIONS`, and `MULTISIGS` as needed, similar to existing chains
 
-### Configure existing EVM contracts
-1. Run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts`
+      b. If introducing new dvns, make sure to update the `getRequiredDVNs` and `getOptionalDVNs` functions
 
-### Configure existing Solana contract(s)
+      c. If making changes to optional dvns, ensure `optionalDVNThreshold` within `layerzero-mainnet.config.ts` is updated as well
+  
+
+### Configure contracts
+
+First, initialize accounts on Solana: `npx hardhat lz:oft:solana:init-config --oapp-config layerzero-mainnet.config.ts --ci`
+
+Then to wire, run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts --ci` 
+
+To transfer ownership, run `npx hardhat lz:ownable:transfer-ownership --oapp-config layerzero-mainnet.config.ts`

@@ -22,7 +22,8 @@ import '@fireblocks/hardhat-fireblocks'
 import './tasks/index'
 
 /**
- * Uncomment the accounts logic below and within each networkif you do not want to use Fireblocks for transaction signing
+ * Uncomment the accounts logic below and within each network if you want to use direct environment configuration
+ * (i.e transactions will not be sent through Fireblocks)
  */
 // Set your preferred authentication method
 //
@@ -72,8 +73,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
@@ -86,8 +87,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
@@ -100,8 +101,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
@@ -114,8 +115,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
@@ -128,8 +129,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
@@ -142,8 +143,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
@@ -158,8 +159,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
@@ -172,8 +173,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
@@ -186,8 +187,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
@@ -200,8 +201,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
@@ -214,8 +215,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
@@ -228,8 +229,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
