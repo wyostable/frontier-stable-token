@@ -127,7 +127,7 @@ task(TASK_LZ_OAPP_WIRE)
 
             if (!apiKey || !privateKey || !vaultAccountId || !payerAddress) {
                 throw new Error(
-                    'Missing required Fireblocks configuration. Please set environment variables: FIREBLOCKS_API_KEY, FIREBLOCKS_PRIVATE_KEY, FIREBLOCKS_VAULT_ACCOUNT_IDS, and SOLANA_PAYER_ADDRESS.'
+                    'Missing required Fireblocks configuration. Please set environment variables: FIREBLOCKS_API_KEY, FIREBLOCKS_PRIVATE_KEY, SOLANA_FIREBLOCKS_VAULT_ACCOUNT_IDS, and SOLANA_PAYER_ADDRESS.'
                 )
             }
 
@@ -314,7 +314,7 @@ task(TASK_LZ_OWNABLE_TRANSFER_OWNERSHIP)
     .addOptionalParam(
         'fireblocksVaultAccountId',
         'Fireblocks vault account ID',
-        process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS,
+        process.env.SOLANA_FIREBLOCKS_VAULT_ACCOUNT_IDS,
         devtoolsTypes.string
     )
     .addOptionalParam(

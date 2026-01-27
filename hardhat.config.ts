@@ -157,8 +157,8 @@ const config: HardhatUserConfig = {
             fireblocks: {
                 privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
                 apiKey: process.env.FIREBLOCKS_API_KEY || '',
-                vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS
-                    ? process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
                     : [],
                 apiBaseUrl: ApiBaseUrl.Production,
             },
