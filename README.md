@@ -113,7 +113,10 @@ If a caller address calls a function with role-base access control and does not 
       b. If introducing new dvns, make sure to update the `getRequiredDVNs` and `getOptionalDVNs` functions
 
       c. If making changes to optional dvns, ensure `optionalDVNThreshold` within `layerzero-mainnet.config.ts` is updated as well
-  
+
+## Deploy contracts
+
+Run `npx hardhat lz:deploy --tags FRNTAdapter --networks <NETWORKS> --ci`
 
 ### Configure contracts
 
