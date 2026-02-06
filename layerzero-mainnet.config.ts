@@ -12,6 +12,7 @@ const CONTRACTS: OmniPointHardhat[] = [
     { eid: EndpointId.ETHEREUM_V2_MAINNET, contractName: 'FRNTAdapter' },
     { eid: EndpointId.OPTIMISM_V2_MAINNET, contractName: 'FRNTAdapter' },
     { eid: EndpointId.POLYGON_V2_MAINNET, contractName: 'FRNTAdapter' },
+    { eid: EndpointId.HEDERA_V2_MAINNET, contractName: 'FRNTAdapter' },
     { eid: EndpointId.SOLANA_V2_MAINNET, address: getOftStoreAddress(EndpointId.SOLANA_V2_MAINNET) },
 ]
 
@@ -40,14 +41,14 @@ const generateConnections = async () => {
                 sendConfig: {
                     ulnConfig: {
                         requiredDVNs: getRequiredDVNs(from.eid),
-                        optionalDVNs: getOptionalDVNs(from.eid),
+                        optionalDVNs: getOptionalDVNs(from.eid, to.eid),
                         optionalDVNThreshold: 1,
                     },
                 },
                 receiveConfig: {
                     ulnConfig: {
                         requiredDVNs: getRequiredDVNs(from.eid),
-                        optionalDVNs: getOptionalDVNs(from.eid),
+                        optionalDVNs: getOptionalDVNs(from.eid, to.eid),
                         optionalDVNThreshold: 1,
                     },
                 },
