@@ -250,6 +250,20 @@ const config: HardhatUserConfig = {
             },
             // accounts,
         },
+        hedera: {
+            eid: EndpointId.HEDERA_V2_MAINNET,
+            url: process.env.RPC_URL_HEDERA_MAINNET || 'https://mainnet.hashio.io/api',
+            chainId: 295,
+            fireblocks: {
+                privateKey: process.env.FIREBLOCKS_PRIVATE_KEY || '',
+                apiKey: process.env.FIREBLOCKS_API_KEY || '',
+                vaultAccountIds: process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS
+                    ? process.env.EVM_FIREBLOCKS_VAULT_ACCOUNT_IDS.split(',')
+                    : [],
+                apiBaseUrl: ApiBaseUrl.Production,
+            },
+            // accounts,
+        },
 
         hardhat: {
             // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit
