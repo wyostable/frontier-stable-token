@@ -123,7 +123,7 @@ If a caller address calls a function with role-base access control and does not 
 
 Run `npx hardhat lz:deploy --tags FRNTAdapter --networks <NETWORKS> --ci`
 
-Ensure the newly deployed FRNTAdapter contract is added as a minter on the ERC20F token so that cross-chain transfers can be facilitated
+Ensure the newly deployed FRNTAdapter contract is assigned the ADAPTER_ROLE on the ERC20F token so that cross-chain transfers can be facilitated
 
 ### Configure contracts
 
