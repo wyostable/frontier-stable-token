@@ -117,9 +117,13 @@ If a caller address calls a function with role-base access control and does not 
 
       c. If making changes to optional dvns, ensure `optionalDVNThreshold` within `layerzero-mainnet.config.ts` is updated as well
 
-## Deploy contracts
+5. Update `hardhat.config.ts` with the new chain's network configuration, similar to existing chains 
+
+### Deploy contracts
 
 Run `npx hardhat lz:deploy --tags FRNTAdapter --networks <NETWORKS> --ci`
+
+Ensure the newly deployed FRNTAdapter contract is added as a minter on the ERC20F token so that cross-chain transfers can be facilitated
 
 ### Configure contracts
 
@@ -128,3 +132,9 @@ First, initialize accounts on Solana: `npx hardhat lz:oft:solana:init-config --o
 Then to wire, run `npx hardhat lz:oapp:wire --oapp-config layerzero-mainnet.config.ts --ci` 
 
 To transfer ownership, run `npx hardhat lz:ownable:transfer-ownership --oapp-config layerzero-mainnet.config.ts`
+
+
+### Possible Failure Scenarios
+1. Ensure RPCs are reliable. If using private RPCs, you can set it to the respective environment variable within `.env`
+
+2. Ensure there are enough funds for the deployer address on all chains. For instance, Solana requires at least 0.1 SOL of funds to deploy and configure contracts
