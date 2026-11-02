@@ -50,7 +50,7 @@ export class OmniSignerFireblocks implements OmniSigner<OmniTransactionResponse<
                     logger.info('Fireblocks: Successfully deserialized LayerZero transaction')
 
                     // Update the transaction with fresh blockhash and set proper fee payer
-                    const { blockhash } = await this.connection.getLatestBlockhash()
+                    const { blockhash } = await this.connection.getLatestBlockhash('confirmed')
                     solanaTransaction.recentBlockhash = blockhash
                     solanaTransaction.feePayer = this.payer
 
@@ -88,7 +88,7 @@ export class OmniSignerFireblocks implements OmniSigner<OmniTransactionResponse<
                 source: { type: TransferPeerPathType.VaultAccount, id: this.vaultAccountId },
                 assetId: this.assetId,
                 note: `LayerZero Wire Transaction - ${new Date().toISOString()}`,
-                feeLevel: 'MEDIUM',
+                feeLevel: 'HIGH',
                 extraParameters: {
                     programCallData: serializedTransaction,
                 },
